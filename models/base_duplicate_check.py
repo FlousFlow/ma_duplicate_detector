@@ -1,9 +1,7 @@
 import re
 
-from markupsafe import Markup
 from odoo import api, models
 from odoo.exceptions import RedirectWarning, UserError
-from odoo.tools import html_escape
 from odoo.tools.sql import table_exists
 from odoo import _
 
@@ -118,29 +116,16 @@ class Base(models.AbstractModel):
         if not duplicate:
             return
 
-        base_url = self.env['ir.config_parameter'].sudo().get_param(
-            'web.base.url', ''
-        )
-        url = f"{base_url}/web#id={duplicate.id}&model={self._name}&view_type=form"
         field_labels = ', '.join(f.field_description for f in rule.field_ids)
-        # The duplicate name itself is the link: one click opens its card.
-        safe_name = html_escape(duplicate.display_name)
-        message = Markup(
-            '<div dir="auto" style="text-align:start">'
-            '<p><b>%(title)s</b></p>'
-            '<p>%(intro)s: '
-            '<a href="%(url)s" target="_blank" style="font-weight:bold;">'
-            '%(name)s</a></p>'
-            '</div>'
-        ) % {
-            'title': _("Duplicate Detected"),
-            'intro': _(
-                "A record with the same %(fields)s already exists",
-                fields=field_labels,
-            ),
-            'url': html_escape(url),
-            'name': safe_name,
-        }
+        # Error dialogs escape HTML, so keep the message plain text; the
+        # RedirectWarning button below is the clickable path to the record.
+        message = _(
+            "%(title)s\n\n%(intro)s:\n\"%(name)s\"",
+            title=_("Duplicate Detected"),
+            intro=_("A record with the same %(fields)s already exists",
+                    fields=field_labels),
+            name=duplicate.display_name,
+        )
 
         if rule.action == 'warn':
             open_action = {
@@ -149,10 +134,12 @@ class Base(models.AbstractModel):
                 'res_model': self._name,
                 'res_id': duplicate.id,
                 'view_mode': 'form',
+                'views': [[False, 'form']],
                 'target': 'current',
             }
             raise RedirectWarning(
-                message, open_action, _("Open Duplicate"),
+                message, open_action,
+                _("Open \"%s\"", duplicate.display_name),
             )
 
         raise UserError(message)
