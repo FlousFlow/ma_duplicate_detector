@@ -16,6 +16,7 @@
                                         ('ttype', 'not in', ['one2many', 'many2many', 'binary'])]"
                                options="{'no_create': True}"/>
                         <field name="action"/>
+                        <field name="enforce_on_import"/>
                         <field name="active"/>
                     </group>
                 </sheet>

@@ -17,9 +17,20 @@ class Base(models.AbstractModel):
             and table_exists(self.env.cr, 'ma_duplicate_rule')
         )
 
+    def _ma_skip_check(self):
+        """True when the check is bypassed: explicit duplicate_skip key,
+        or a CSV/XLSX import (context import_file) unless the active rule
+        is configured to enforce during imports."""
+        if self.env.context.get('duplicate_skip'):
+            return True
+        if not self.env.context.get('import_file'):
+            return False
+        rule = self._ma_get_duplicate_rule()
+        return bool(rule) and not rule.enforce_on_import
+
     @api.model_create_multi
     def create(self, vals_list):
-        if not self.env.context.get('duplicate_skip') and self._ma_rule_available():
+        if not self._ma_skip_check() and self._ma_rule_available():
             rule = self._ma_get_duplicate_rule()
             if rule and rule.field_ids and rule.action != 'notify':
                 for vals in vals_list:
@@ -28,7 +39,7 @@ class Base(models.AbstractModel):
 
     def write(self, vals):
         if (
-            not self.env.context.get('duplicate_skip')
+            not self._ma_skip_check()
             and len(self) == 1
             and self._ma_rule_available()
         ):

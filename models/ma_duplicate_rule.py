@@ -34,6 +34,12 @@ class MaDuplicateRule(models.Model):
              "record.\nBlock: raises a blocking error.\nNotify: saves the "
              "record and shows a non-blocking notification with a link.",
     )
+    enforce_on_import = fields.Boolean(
+        string='Apply During Imports', default=False,
+        help="If enabled, records imported from CSV/XLSX that match this "
+             "rule are rejected too. If disabled (default), imports bypass "
+             "the check.",
+    )
     active = fields.Boolean(default=True)
 
     _sql_constraints = [

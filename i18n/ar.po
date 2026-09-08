@@ -73,3 +73,8 @@ msgstr "يوجد سجل بنفس %(fields)s بالفعل"
 #: code:addons/ma_duplicate_detector/models/base_duplicate_check.py:0
 msgid "Open \"%s\""
 msgstr "فتح \"%s\""
+
+#. module: ma_duplicate_detector
+#: model:ir.model.fields,field_description:ma_duplicate_detector.field_ma_duplicate_rule__enforce_on_import
+msgid "Apply During Imports"
+msgstr "تطبيق الفحص أثناء الاستيراد"
