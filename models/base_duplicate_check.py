@@ -1,7 +1,9 @@
 import re
 
+from markupsafe import Markup
 from odoo import api, models
 from odoo.exceptions import RedirectWarning, UserError
+from odoo.tools import html_escape
 from odoo.tools.sql import table_exists
 from odoo import _
 
@@ -121,15 +123,24 @@ class Base(models.AbstractModel):
         )
         url = f"{base_url}/web#id={duplicate.id}&model={self._name}&view_type=form"
         field_labels = ', '.join(f.field_description for f in rule.field_ids)
-        message = _(
-            "Duplicate Detected\n\n"
-            "A record with the same %(fields)s already exists:\n"
-            "\"%(name)s\"\n\n"
-            "Open it here:\n%(url)s",
-            fields=field_labels,
-            name=duplicate.display_name,
-            url=url,
-        )
+        # The duplicate name itself is the link: one click opens its card.
+        safe_name = html_escape(duplicate.display_name)
+        message = Markup(
+            '<div dir="auto" style="text-align:start">'
+            '<p><b>%(title)s</b></p>'
+            '<p>%(intro)s: '
+            '<a href="%(url)s" target="_blank" style="font-weight:bold;">'
+            '%(name)s</a></p>'
+            '</div>'
+        ) % {
+            'title': _("Duplicate Detected"),
+            'intro': _(
+                "A record with the same %(fields)s already exists",
+                fields=field_labels,
+            ),
+            'url': html_escape(url),
+            'name': safe_name,
+        }
 
         if rule.action == 'warn':
             open_action = {

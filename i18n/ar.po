@@ -63,3 +63,8 @@ msgstr "تنبيه فقط — يتم الحفظ بنجاح"
 #: model:ir.model.fields.selection,name:ma_duplicate_detector.selection__ma_duplicate_rule__action__warn
 msgid "Warning dialog (choose to open the existing record)"
 msgstr "نافذة تنبيه (مع خيار فتح السجل الموجود)"
+
+#. module: ma_duplicate_detector
+#: code:addons/ma_duplicate_detector/models/base_duplicate_check.py:0
+msgid "A record with the same %(fields)s already exists"
+msgstr "يوجد سجل بنفس %(fields)s بالفعل"
