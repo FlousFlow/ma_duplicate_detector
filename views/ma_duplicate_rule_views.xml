@@ -15,6 +15,7 @@
                                         ('store', '=', True),
                                         ('ttype', 'not in', ['one2many', 'many2many', 'binary'])]"
                                options="{'no_create': True}"/>
+                        <field name="action"/>
                         <field name="active"/>
                     </group>
                 </sheet>
@@ -29,7 +30,8 @@
             <list string="Duplicate Rules" create="1">
                 <field name="name" string="Model"/>
                 <field name="field_ids" widget="many2many_tags"/>
-                <field name="active"/>
+                <field name="action" optional="show"/>
+                <field name="active" optional="show"/>
             </list>
         </field>
     </record>

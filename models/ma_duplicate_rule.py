@@ -25,6 +25,13 @@ class MaDuplicateRule(models.Model):
         domain="[('model_id', '=', model_id), ('store', '=', True), "
                "('ttype', 'not in', ['one2many', 'many2many', 'binary'])]",
     )
+    action = fields.Selection(
+        [('warn', 'Warning with link (still requires a decision)'),
+         ('block', 'Block Save (hard stop)')],
+        string='On Duplicate Found', default='block', required=True,
+        help="Warn: interrupts the save with a direct button to open the "
+             "existing record.\nBlock: raises a blocking error.",
+    )
     active = fields.Boolean(default=True)
 
     _sql_constraints = [

@@ -1,6 +1,7 @@
 from odoo import api, models
-from odoo.exceptions import UserError
+from odoo.exceptions import RedirectWarning, UserError
 from odoo.tools.sql import table_exists
+from odoo import _
 
 
 class Base(models.AbstractModel):
@@ -71,10 +72,27 @@ class Base(models.AbstractModel):
         )
         url = f"{base_url}/web#id={duplicate.id}&model={self._name}&view_type=form"
         field_labels = ', '.join(f.field_description for f in rule.field_ids)
-
-        raise UserError(
-            f"Duplicate Detected\n\n"
-            f"A record with the same {field_labels} already exists:\n"
-            f'"{duplicate.display_name}"\n\n'
-            f"Open it here:\n{url}"
+        message = _(
+            "Duplicate Detected\n\n"
+            "A record with the same %(fields)s already exists:\n"
+            "\"%(name)s\"\n\n"
+            "Open it here:\n%(url)s",
+            fields=field_labels,
+            name=duplicate.display_name,
+            url=url,
         )
+
+        if rule.action == 'warn':
+            open_action = {
+                'type': 'ir.actions.act_window',
+                'name': duplicate.display_name,
+                'res_model': self._name,
+                'res_id': duplicate.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+            raise RedirectWarning(
+                message, open_action, _("Open Duplicate"),
+            )
+
+        raise UserError(message)
