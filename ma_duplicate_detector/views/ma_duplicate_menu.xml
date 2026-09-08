@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_ma_duplicate_root"
+              name="Duplicate Detector"
+              parent="base.menu_custom"
+              groups="base.group_system"
+              sequence="110"/>
+
+    <menuitem id="menu_ma_duplicate_rules"
+              name="Duplicate Rules"
+              parent="menu_ma_duplicate_root"
+              action="action_ma_duplicate_rule"
+              sequence="10"/>
+
+</odoo>
