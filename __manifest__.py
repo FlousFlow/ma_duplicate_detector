@@ -1,6 +1,6 @@
 {
     'name': 'Duplicate Record Detector | Prevent Duplicate Records in Odoo | Duplicate Warning on Save | Configurable Duplicate Check',
-    'version': '19.0.1.0.4',
+    'version': '19.0.1.0.5',
     'category': 'Extra Tools',
     'summary': 'Warn users when saving an Odoo record that matches an existing one on your configured fields, so duplicates are caught before they enter the database.',
     'author': 'CODEerts',

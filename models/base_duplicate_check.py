@@ -1,7 +1,11 @@
+import re
+
 from odoo import api, models
 from odoo.exceptions import RedirectWarning, UserError
 from odoo.tools.sql import table_exists
 from odoo import _
+
+PHONE_FIELDS = {'phone', 'mobile', 'whatsapp', 'whatsapp_number'}
 
 
 class Base(models.AbstractModel):
@@ -72,20 +76,38 @@ class Base(models.AbstractModel):
             return {'id': duplicate.id, 'name': duplicate.display_name}
         return False
 
+    @api.model
+    def _ma_field_leafs(self, field, value):
+        """Domain leaves matching a field value, phone-number aware.
+
+        Phone fields match the exact value OR any stored variant sharing the
+        last 8 digits (covers +20/0020 prefixes, spaces, dashes), e.g.
+        '01009560007' matches '+20 100 956 0007'.
+        """
+        leafs = [(field.name, '=', value)]
+        if field.name in PHONE_FIELDS and isinstance(value, str):
+            digits = re.sub(r'\D', '', value)
+            tail = digits[-8:]
+            if len(digits) >= 8 and tail != value:
+                leafs.append((field.name, 'ilike', tail))
+        return leafs
+
     def _ma_find_duplicate(self, rule, vals, exclude_id):
-        domain = []
+        domain = None
         for field in rule.field_ids:
             value = vals.get(field.name)
             if value in (False, None, '', 0):
                 return None  # skip check if any field is empty/unset
 
-            domain.append((field.name, '=', value))
+            leafs = self._ma_field_leafs(field, value)
+            group = leafs[0] if len(leafs) == 1 else ['|'] + leafs
+            domain = group if domain is None else ['&', domain, group]
 
-        if not domain:
+        if domain is None:
             return None
 
         if exclude_id:
-            domain.append(('id', '!=', exclude_id))
+            domain = ['&', domain, ('id', '!=', exclude_id)]
 
         return self.env[self._name].sudo().search(domain, limit=1)
 
