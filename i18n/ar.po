@@ -53,3 +53,13 @@ msgstr "قاعدة كشف التكرار"
 #: model_terms:ir.ui.view,arch_db:ma_duplicate_detector.view_ma_duplicate_rule_list
 msgid "Model"
 msgstr "الموديل"
+
+#. module: ma_duplicate_detector
+#: model:ir.model.fields.selection,name:ma_duplicate_detector.selection__ma_duplicate_rule__action__notify
+msgid "Notification only — saves anyway"
+msgstr "تنبيه فقط — يتم الحفظ بنجاح"
+
+#. module: ma_duplicate_detector
+#: model:ir.model.fields.selection,name:ma_duplicate_detector.selection__ma_duplicate_rule__action__warn
+msgid "Warning dialog (choose to open the existing record)"
+msgstr "نافذة تنبيه (مع خيار فتح السجل الموجود)"

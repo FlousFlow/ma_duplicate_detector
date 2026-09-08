@@ -26,11 +26,13 @@ class MaDuplicateRule(models.Model):
                "('ttype', 'not in', ['one2many', 'many2many', 'binary'])]",
     )
     action = fields.Selection(
-        [('warn', 'Warning with link (still requires a decision)'),
-         ('block', 'Block Save (hard stop)')],
+        [('warn', 'Warning dialog (choose to open the existing record)'),
+         ('block', 'Block Save (hard stop)'),
+         ('notify', 'Notification only — saves anyway')],
         string='On Duplicate Found', default='block', required=True,
-        help="Warn: interrupts the save with a direct button to open the "
-             "existing record.\nBlock: raises a blocking error.",
+        help="Warn: interrupts the save with a button to open the existing "
+             "record.\nBlock: raises a blocking error.\nNotify: saves the "
+             "record and shows a non-blocking notification with a link.",
     )
     active = fields.Boolean(default=True)
 

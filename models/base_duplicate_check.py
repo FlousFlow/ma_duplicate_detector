@@ -17,7 +17,7 @@ class Base(models.AbstractModel):
     def create(self, vals_list):
         if not self.env.context.get('duplicate_skip') and self._ma_rule_available():
             rule = self._ma_get_duplicate_rule()
-            if rule and rule.field_ids:
+            if rule and rule.field_ids and rule.action != 'notify':
                 for vals in vals_list:
                     self._ma_check_duplicate_vals(rule, vals, exclude_id=None)
         return super().create(vals_list)
@@ -29,7 +29,7 @@ class Base(models.AbstractModel):
             and self._ma_rule_available()
         ):
             rule = self._ma_get_duplicate_rule()
-            if rule and rule.field_ids:
+            if rule and rule.field_ids and rule.action != 'notify':
                 rule_field_names = rule.field_ids.mapped('name')
                 if any(fname in vals for fname in rule_field_names):
                     merged = {}
@@ -48,22 +48,49 @@ class Base(models.AbstractModel):
             limit=1,
         )
 
-    def _ma_check_duplicate_vals(self, rule, vals, exclude_id):
+    @api.model
+    def ma_check_duplicate(self, vals):
+        """Called from the web client before saving (notify mode).
+
+        Returns {'id': int, 'name': str} if a rule matches the given values,
+        False otherwise. Never raises.
+        """
+        if self.env.context.get('duplicate_skip') or not self._ma_rule_available():
+            return False
+        rule = self._ma_get_duplicate_rule()
+        if not rule or not rule.field_ids:
+            return False
+        merged = {}
+        for field in rule.field_ids:
+            if field.name in vals:
+                merged[field.name] = vals[field.name]
+            elif self.id:
+                v = self[field.name]
+                merged[field.name] = v.id if hasattr(v, 'id') else v
+        duplicate = self._ma_find_duplicate(rule, merged, exclude_id=self.id or None)
+        if duplicate:
+            return {'id': duplicate.id, 'name': duplicate.display_name}
+        return False
+
+    def _ma_find_duplicate(self, rule, vals, exclude_id):
         domain = []
         for field in rule.field_ids:
             value = vals.get(field.name)
             if value in (False, None, '', 0):
-                return  # skip check if any field is empty/unset
+                return None  # skip check if any field is empty/unset
 
             domain.append((field.name, '=', value))
 
         if not domain:
-            return
+            return None
 
         if exclude_id:
             domain.append(('id', '!=', exclude_id))
 
-        duplicate = self.env[self._name].sudo().search(domain, limit=1)
+        return self.env[self._name].sudo().search(domain, limit=1)
+
+    def _ma_check_duplicate_vals(self, rule, vals, exclude_id):
+        duplicate = self._ma_find_duplicate(rule, vals, exclude_id)
         if not duplicate:
             return
 
