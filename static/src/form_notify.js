@@ -5,10 +5,30 @@ import { useService } from "@web/core/utils/hooks";
 
 /**
  * Non-blocking duplicate notification ('notify' rule action).
- * Before the record is saved, ask the server whether the current changes
- * would match an active Duplicate Rule. If so, save anyway but show a
- * warning notification with a link to the existing record.
+ *
+ * The list of models having an active 'notify' rule is fetched ONCE per
+ * web-client session, so saves on models without rules cost zero extra RPC.
+ * (If an admin adds a rule mid-session, reload the browser to activate it.)
  */
+let maNotifyModels = null;
+
+async function getNotifyModels(orm) {
+    if (maNotifyModels === null) {
+        try {
+            maNotifyModels = new Set(
+                await orm.silent.call(
+                    "ma.duplicate.rule",
+                    "get_notify_models",
+                    [],
+                ),
+            );
+        } catch {
+            maNotifyModels = new Set();
+        }
+    }
+    return maNotifyModels;
+}
+
 patch(FormController.prototype, {
     setup() {
         super.setup(...arguments);
@@ -19,6 +39,10 @@ patch(FormController.prototype, {
         const result = await super.onWillSaveRecord(record, params);
         if (result === false) {
             return false;
+        }
+        const notifyModels = await getNotifyModels(this.orm);
+        if (!notifyModels.has(record.resModel)) {
+            return true;
         }
         try {
             const duplicate = await this.orm.silent.call(

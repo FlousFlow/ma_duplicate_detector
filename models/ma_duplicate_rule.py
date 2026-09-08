@@ -45,3 +45,14 @@ class MaDuplicateRule(models.Model):
     def _compute_name(self):
         for rec in self:
             rec.name = rec.model_id.name or ''
+
+    @api.model
+    def get_notify_models(self):
+        """Technical names of models having an active 'notify' rule.
+
+        Called once per web-client session by the form controller patch so
+        that saves on models without rules cost zero extra RPC.
+        """
+        return self.sudo().search(
+            [('active', '=', True), ('action', '=', 'notify')]
+        ).mapped('model_name')
