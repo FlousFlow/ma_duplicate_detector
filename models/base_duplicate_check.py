@@ -54,7 +54,13 @@ class Base(models.AbstractModel):
                 and not self._ma_required_skip():
             rule = self._ma_get_required_rule()
             if rule and rule.field_ids:
-                names = set(rule.field_ids.mapped('name'))
+                # many2one fields (country/state) are NOT marked required in
+                # the view: they are auto-filled from GPS coords, and the
+                # server backfills them during save before the required
+                # check runs — so the capture flow never deadlocks.
+                names = set(
+                    rule.field_ids.filtered(
+                        lambda f: f.ttype != 'many2one').mapped('name'))
                 try:
                     root = etree.fromstring(result['arch'])
                     changed = False
@@ -115,7 +121,15 @@ class Base(models.AbstractModel):
         incoming vals over the current values and reject if a required field
         ends up empty."""
         missing = []
+        # When GPS coordinates were captured, country/state are backfilled
+        # server-side from them; the geocoder may transiently fail (rate
+        # limit), so these two must never block a located contact's save.
+        coords_captured = bool(
+            getattr(self, 'partner_latitude', False)
+            and getattr(self, 'partner_longitude', False))
         for field in rule.field_ids:
+            if coords_captured and field.name in ('country_id', 'state_id'):
+                continue
             if vals and field.name in vals:
                 v = vals[field.name]
             else:
