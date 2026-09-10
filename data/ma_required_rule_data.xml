@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Contacts: address + phone must always be filled -->
+    <record id="required_rule_res_partner" model="ma.required.field.rule">
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="field_ids" eval="[
+            Command.link(ref('base.field_res_partner__street')),
+            Command.link(ref('base.field_res_partner__city')),
+            Command.link(ref('base.field_res_partner__country_id')),
+        ]"/>
+        <field name="enforce_on_import" eval="False"/>
+    </record>
+    <!-- Products: must belong to a category -->
+    <record id="required_rule_product_template" model="ma.required.field.rule">
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="field_ids" eval="[
+            Command.link(ref('product.field_product_template__categ_id')),
+        ]"/>
+        <field name="enforce_on_import" eval="False"/>
+    </record>
+</odoo>

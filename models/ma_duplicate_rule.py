@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 
 
 class MaDuplicateRule(models.Model):
@@ -62,3 +62,54 @@ class MaDuplicateRule(models.Model):
         return self.sudo().search(
             [('active', '=', True), ('action', '=', 'notify')]
         ).mapped('model_name')
+
+
+class MaRequiredFieldRule(models.Model):
+    _name = 'ma.required.field.rule'
+    _description = 'Required Field Rule (data completeness on save)'
+    _rec_name = 'name'
+
+    name = fields.Char(compute='_compute_name', store=True)
+    model_id = fields.Many2one(
+        'ir.model',
+        string='Model',
+        required=True,
+        ondelete='cascade',
+    )
+    model_name = fields.Char(
+        related='model_id.model',
+        store=True,
+        string='Technical Name',
+        index=True,
+    )
+    field_ids = fields.Many2many(
+        'ir.model.fields',
+        string='Required Fields',
+        domain="[('model_id', '=', model_id), ('store', '=', True), "
+               "('ttype', 'not in', ['one2many', 'many2many', 'binary'])]",
+        required=True,
+    )
+    exempt_group_id = fields.Many2one(
+        'res.groups',
+        string='Exempt Group',
+        help="Members of this group can save records without these fields "
+             "(e.g. administrators doing cleanups). Empty = applies to "
+             "everyone.",
+    )
+    enforce_on_import = fields.Boolean(
+        string='Apply During Imports', default=False,
+        help="If enabled, CSV/XLSX imports are also rejected when a record "
+             "is missing a required field. Keep it off while you are still "
+             "back-filling historical data.",
+    )
+    active = fields.Boolean(default=True)
+
+    _sql_constraints = [
+        ('unique_model_id', 'UNIQUE(model_id)',
+         'A required-field rule already exists for this model.'),
+    ]
+
+    @api.depends('model_id')
+    def _compute_name(self):
+        for rec in self:
+            rec.name = _('%(model)s: required fields', model=rec.model_id.name or '')

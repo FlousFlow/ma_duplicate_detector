@@ -17,6 +17,12 @@ class Base(models.AbstractModel):
             and table_exists(self.env.cr, 'ma_duplicate_rule')
         )
 
+    def _ma_required_rule_available(self):
+        return (
+            'ma.required.field.rule' in self.env
+            and table_exists(self.env.cr, 'ma_required_field_rule')
+        )
+
     def _ma_skip_check(self):
         """True when the check is bypassed: explicit duplicate_skip key,
         or a CSV/XLSX import (context import_file) unless the active rule
@@ -28,14 +34,97 @@ class Base(models.AbstractModel):
         rule = self._ma_get_duplicate_rule()
         return bool(rule) and not rule.enforce_on_import
 
+    # ------------------------------------------------------------------
+    # Required field rules (data completeness)
+    # ------------------------------------------------------------------
+    def _ma_get_required_rule(self):
+        return self.env['ma.required.field.rule'].sudo().search(
+            [('model_name', '=', self._name), ('active', '=', True)],
+            limit=1,
+        )
+
+    def _ma_required_skip(self):
+        """Bypass cases: explicit context key, system (sudo) writes done by
+        server automation (crons, website flows), or a member of the rule's
+        exempt group. Imports follow the rule's enforce_on_import flag."""
+        if self.env.context.get('duplicate_skip'):
+            return True
+        if self.env.su and not self.env.context.get('import_file'):
+            return True
+        rule = self._ma_get_required_rule()
+        if not rule:
+            return True
+        if self.env.context.get('import_file') and not rule.enforce_on_import:
+            return True
+        if rule.exempt_group_id and \
+                rule.exempt_group_id in self.env.user.group_ids:
+            return True
+        return False
+
+    def _ma_check_required_vals(self, rule, vals):
+        missing = []
+        for field in rule.field_ids:
+            if field.name not in vals:
+                continue
+            value = vals[field.name]
+            if value in (False, None, '', 0):
+                missing.append(field.field_description)
+        if missing:
+            raise UserError(_(
+                "%(title)s\n\n"
+                "%(intro)s %(fields)s.\n\n"
+                "%(hint)s",
+                title=_("Required data is missing"),
+                intro=_("This record cannot be saved without:"),
+                fields=', '.join(missing),
+                hint=_("Please fill in the highlighted fields, or capture the "
+                       "customer's location to fill the address "
+                       "automatically."),
+            ))
+
+    def _ma_check_required_merged(self, rule, vals=None):
+        """Check the state the record WILL have after this write: merge the
+        incoming vals over the current values and reject if a required field
+        ends up empty."""
+        missing = []
+        for field in rule.field_ids:
+            if vals and field.name in vals:
+                v = vals[field.name]
+            else:
+                v = self[field.name]
+                v = v.id if hasattr(v, 'id') else v
+            if v in (False, None, '', 0):
+                missing.append(field.field_description)
+        if missing:
+            raise UserError(_(
+                "%(title)s\n\n%(record)s is missing: %(fields)s.\n\n"
+                "%(hint)s",
+                title=_("Required data is missing"),
+                record=self.display_name,
+                fields=', '.join(missing),
+                hint=_("Please fill in the highlighted fields, or capture the "
+                       "customer's location to fill the address "
+                       "automatically."),
+            ))
+
+
     @api.model_create_multi
     def create(self, vals_list):
-        if not self._ma_skip_check() and self._ma_rule_available():
+        if self._ma_rule_available() and not self._ma_skip_check():
             rule = self._ma_get_duplicate_rule()
             if rule and rule.field_ids and rule.action != 'notify':
                 for vals in vals_list:
                     self._ma_check_duplicate_vals(rule, vals, exclude_id=None)
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        # Validate the FINAL state of the new records: a field absent from
+        # vals still ends up empty when it has no default. Raising here rolls
+        # the whole create back, so nothing partial is persisted.
+        if self._ma_required_rule_available() and not self._ma_required_skip():
+            req_rule = self._ma_get_required_rule()
+            if req_rule and req_rule.field_ids:
+                for record, vals in zip(records, vals_list):
+                    record._ma_check_required_merged(req_rule, vals)
+        return records
 
     def write(self, vals):
         if (
@@ -55,6 +144,16 @@ class Base(models.AbstractModel):
                             v = self[fname]
                             merged[fname] = v.id if hasattr(v, 'id') else v
                     self._ma_check_duplicate_vals(rule, merged, exclude_id=self.id)
+        if (
+            not self._ma_required_skip()
+            and len(self) == 1
+            and self._ma_required_rule_available()
+        ):
+            req_rule = self._ma_get_required_rule()
+            if req_rule and req_rule.field_ids:
+                rule_field_names = req_rule.field_ids.mapped('name')
+                if any(fname in vals for fname in rule_field_names):
+                    self._ma_check_required_merged(req_rule, vals)
         return super().write(vals)
 
     def _ma_get_duplicate_rule(self):

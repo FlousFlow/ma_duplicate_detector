@@ -1,6 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Required Field Rules (data completeness) -->
+    <record id="view_ma_required_rule_form" model="ir.ui.view">
+        <field name="name">ma.required.field.rule.form</field>
+        <field name="model">ma.required.field.rule</field>
+        <field name="arch" type="xml">
+            <form string="Required Field Rule">
+                <sheet>
+                    <group>
+                        <field name="active" widget="boolean_toggle"/>
+                        <field name="model_id"/>
+                        <field name="field_ids"
+                               widget="many2many_tags"
+                               domain="[('model_id', '=', model_id),
+                                        ('store', '=', True),
+                                        ('ttype', 'not in',
+                                         ['one2many', 'many2many', 'binary'])]"/>
+                        <field name="exempt_group_id"/>
+                        <field name="enforce_on_import"/>
+                        <field name="model_name" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ma_required_rule_list" model="ir.ui.view">
+        <field name="name">ma.required.field.rule.list</field>
+        <field name="model">ma.required.field.rule</field>
+        <field name="arch" type="xml">
+            <list string="Required Field Rules">
+                <field name="model_id"/>
+                <field name="field_ids" widget="many2many_tags"/>
+                <field name="exempt_group_id"/>
+                <field name="enforce_on_import"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_ma_required_rule" model="ir.actions.act_window">
+        <field name="name">Required Field Rules</field>
+        <field name="res_model">ma.required.field.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a required-field rule
+            </p>
+            <p>
+                Pick a model and the fields that must always be filled before
+                a record can be saved (e.g. contact address or phone,
+                product category). Saving is blocked server-side until the
+                fields are filled.
+            </p>
+        </field>
+    </record>
+
     <record id="view_ma_duplicate_rule_form" model="ir.ui.view">
         <field name="name">ma.duplicate.rule.form</field>
         <field name="model">ma.duplicate.rule</field>

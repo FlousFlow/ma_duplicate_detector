@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_ma_duplicate_rule_admin,ma.duplicate.rule admin,model_ma_duplicate_rule,base.group_system,1,1,1,1
+access_ma_required_field_rule_admin,ma.required.field.rule admin,model_ma_required_field_rule,base.group_system,1,1,1,1

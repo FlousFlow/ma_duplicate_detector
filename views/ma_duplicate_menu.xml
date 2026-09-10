@@ -13,4 +13,10 @@
               action="action_ma_duplicate_rule"
               sequence="10"/>
 
+    <menuitem id="menu_ma_required_rules"
+              name="Required Field Rules"
+              parent="menu_ma_duplicate_root"
+              action="action_ma_required_rule"
+              sequence="20"/>
+
 </odoo>

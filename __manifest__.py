@@ -13,9 +13,10 @@
             'ma_duplicate_detector/static/src/form_notify.js',
         ],
     },
-    'depends': ['base'],
+    'depends': ['base', 'product'],
     'data': [
         'security/ir.model.access.csv',
+        'data/ma_required_rule_data.xml',
         'views/ma_duplicate_rule_views.xml',
         'views/ma_duplicate_menu.xml',
     ],
