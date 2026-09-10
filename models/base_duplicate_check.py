@@ -1,5 +1,6 @@
 import re
 
+from lxml import etree
 from odoo import api, models
 from odoo.exceptions import RedirectWarning, UserError
 from odoo.tools.sql import table_exists
@@ -42,6 +43,33 @@ class Base(models.AbstractModel):
             [('model_name', '=', self._name), ('active', '=', True)],
             limit=1,
         )
+
+    def get_view(self, view_id=None, view_type='form', **options):
+        """Mark required-rule fields with required="1" in form views so they
+        render with the standard red asterisk and the web client validates
+        them like native required fields. The Base create/write checks stay
+        as the server-side authority."""
+        result = super().get_view(view_id, view_type, **options)
+        if view_type == 'form' and self._ma_required_rule_available() \
+                and not self._ma_required_skip():
+            rule = self._ma_get_required_rule()
+            if rule and rule.field_ids:
+                names = set(rule.field_ids.mapped('name'))
+                try:
+                    root = etree.fromstring(result['arch'])
+                    changed = False
+                    for node in root.iter('field'):
+                        if node.get('name') in names \
+                                and not node.get('required') \
+                                and not node.get('readonly'):
+                            node.set('required', '1')
+                            changed = True
+                    if changed:
+                        result['arch'] = etree.tostring(
+                            root, encoding='unicode')
+                except etree.XMLSyntaxError:
+                    pass
+        return result
 
     def _ma_required_skip(self):
         """Bypass cases: explicit context key, system (sudo) writes done by
