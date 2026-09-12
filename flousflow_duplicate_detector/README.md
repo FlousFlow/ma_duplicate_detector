@@ -23,6 +23,16 @@ Duplicate contacts, products, and vendors accumulate silently until they become 
 - **Standard Field Highlighting** — required-field rules are checked before the
   save RPC; every missing field is marked with Odoo's native invalid-field
   styling so users can see exactly what to complete.
+- **Required Field Rules** — define fields that must be completed for a model,
+  independently from duplicate matching. The rule can be enabled per model,
+  limited to selected users through an exemption group, and enforced during
+  imports when required.
+- **Two-Layer Validation** — the browser highlights missing fields before a
+  save request is sent, while the server validates `create` and `write` as the
+  final authority for API calls, imports, and other clients.
+- **Three Duplicate Actions** — choose a warning dialog, a hard block, or a
+  non-blocking notification that lets the record save while linking to the
+  existing match.
 
 ## Installation
 
@@ -37,9 +47,24 @@ Duplicate contacts, products, and vendors accumulate silently until they become 
 3. Create a rule: choose the **Model**, then pick the **Fields to Check** (stored, non-relational fields only).
 4. Enable the rule. The check is active immediately on every save.
 
+### Required field rules
+
+1. Open **Settings → Technical → Duplicate Detector → Required Field Rules**.
+2. Select a model and the fields that must be completed.
+3. Optionally choose an **Exempt Group** for administrators or data-cleanup users.
+4. Enable **Apply During Imports** only when incomplete imported rows should be rejected.
+
+On a form, missing configured fields receive the same invalid styling used by
+native Odoo required fields. The save is stopped before the RPC, and the server
+performs the same check again for non-browser writes.
+
 ## Usage
 
 - When a user saves a record whose selected fields all match an existing record, a blocking alert appears showing the existing record's name and a direct link to open it.
+- The duplicate action is configurable: **Warning dialog**, **Block Save**, or
+  **Notification only**.
+- When a required-field rule finds empty values, the exact fields are marked in
+  the form so the user knows what to complete; no failed save request is sent.
 - Rules can be temporarily disabled with the **Active** toggle without deleting them.
 
 ## Technical Notes
@@ -47,6 +72,8 @@ Duplicate contacts, products, and vendors accumulate silently until they become 
 - Checks are implemented on `models.AbstractModel` (`base`) via `create`/`write` overrides, with a context flag (`duplicate_skip`) to allow safe bypass when needed.
 - The rule lookup uses `sudo()` because rules are technical configuration that all users are checked against.
 - Works with any model; rule-per-model uniqueness is enforced at the database level.
+- Required-field rules use the same per-model configuration pattern and are
+  enforced in both the web client and the ORM layer.
 
 ## License
 

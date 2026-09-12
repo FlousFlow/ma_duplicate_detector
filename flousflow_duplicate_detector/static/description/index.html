@@ -108,6 +108,26 @@
         <p style="font-size:1.0rem;color:#5a6b7f;margin:0;line-height:1.55;">Bulk imports and programmatic operations can bypass the check using the duplicate_skip context key. This prevents noise during migrations and batch data loads.</p>
       </td>
     </tr>
+    <tr style="vertical-align:top;">
+      <td style="padding:16px 18px;background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:8px;">
+        <strong style="font-size:1.04rem;color:#0e8377;display:block;margin-bottom:5px;">&#10003; Required Field Rules</strong>
+        <p style="font-size:1.0rem;color:#5a6b7f;margin:0;line-height:1.55;">Define fields that must be completed for each model, with an optional exemption group and separate import enforcement.</p>
+      </td>
+      <td style="padding:16px 18px;background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:8px;">
+        <strong style="font-size:1.04rem;color:#0e8377;display:block;margin-bottom:5px;">&#9888; Native Field Feedback</strong>
+        <p style="font-size:1.0rem;color:#5a6b7f;margin:0;line-height:1.55;">Missing fields are highlighted with Odoo's standard invalid styling before save, while server-side validation protects API and import writes.</p>
+      </td>
+    </tr>
+    <tr style="vertical-align:top;">
+      <td style="padding:16px 18px;background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:8px;">
+        <strong style="font-size:1.04rem;color:#0e8377;display:block;margin-bottom:5px;">&#128221; Flexible Duplicate Actions</strong>
+        <p style="font-size:1.0rem;color:#5a6b7f;margin:0;line-height:1.55;">Choose a warning dialog, a hard block, or a non-blocking notification per model.</p>
+      </td>
+      <td style="padding:16px 18px;background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:8px;">
+        <strong style="font-size:1.04rem;color:#0e8377;display:block;margin-bottom:5px;">&#128737; Server-Authoritative Checks</strong>
+        <p style="font-size:1.0rem;color:#5a6b7f;margin:0;line-height:1.55;">The browser gives immediate feedback, and the ORM repeats validation for every client and integration.</p>
+      </td>
+    </tr>
   </table>
 </div>
 
@@ -151,6 +171,15 @@
         <p style="color:#5a6b7f;font-size:1.04rem;margin:4px 0 0;line-height:1.6;">From now on, any user who tries to save a matching record will see an alert with the duplicate's name and a link to open it.</p>
       </td>
     </tr>
+    <tr style="vertical-align:top;">
+      <td style="padding:0 0 0;">
+        <div style="width:32px;height:32px;border:2px solid #0e8377;border-radius:50%;line-height:28px;text-align:center;font-weight:800;font-size:.96rem;color:#0e8377;">5</div>
+      </td>
+      <td style="padding:0 0 0 4px;">
+        <strong style="color:#0b1a2e;font-size:1.09rem;">Use required-field feedback</strong>
+        <p style="color:#5a6b7f;font-size:1.04rem;margin:4px 0 0;line-height:1.6;">If a required-field rule is active, empty fields are highlighted in the form before Odoo sends the save request.</p>
+      </td>
+    </tr>
   </table>
 </div>
 
@@ -165,6 +194,21 @@
     <p style="font-size:.96rem;font-weight:700;color:#0e8377;text-transform:uppercase;letter-spacing:.4px;margin:0 0 10px;">DUPLICATE ALERT ON SAVE</p>
     <img src="screenshot_2.png" alt="Error dialog showing duplicate detected with link to existing record" style="width:100%;max-width:1000px;display:block;margin:0 auto;border-radius:10px;border:1px solid #dbe5ec;"/>
   </div>
+</div>
+
+<!-- REQUIRED FIELD RULES -->
+<div style="padding:36px 44px 34px;background:#ffffff;">
+  <p style="font-size:.72rem;color:#0e8377;text-transform:uppercase;letter-spacing:.22em;font-weight:700;margin:0 0 14px;">Added in FlousFlow edition</p>
+  <h2 style="font-size:1.75rem;font-weight:900;color:#0b1a2e;margin:0 0 12px;">Required Field Rules with native Odoo feedback</h2>
+  <p style="font-size:1.08rem;line-height:1.75;color:#415062;margin:0 0 20px;">This extension is separate from duplicate matching: administrators can define fields that must be completed for each model. When a user clicks Save, every missing configured field is highlighted using Odoo's standard invalid-field styling, so the user can immediately see what to fix.</p>
+  <table style="width:100%;border-collapse:separate;border-spacing:10px;">
+    <tr style="vertical-align:top;">
+      <td style="width:33%;padding:18px;background:#f6fafb;border:1px solid #e1eaef;border-top:3px solid #15a89b;border-radius:8px;"><strong style="font-size:1.02rem;color:#0e8377;display:block;margin-bottom:5px;">1. Configure per model</strong><p style="font-size:.95rem;color:#5a6b7f;margin:0;line-height:1.55;">Choose a model and its required fields from Settings &gt; Technical &gt; Duplicate Detector &gt; Required Field Rules.</p></td>
+      <td style="width:33%;padding:18px;background:#f6fafb;border:1px solid #e1eaef;border-top:3px solid #15a89b;border-radius:8px;"><strong style="font-size:1.02rem;color:#0e8377;display:block;margin-bottom:5px;">2. Guide the user</strong><p style="font-size:.95rem;color:#5a6b7f;margin:0;line-height:1.55;">The form marks the exact empty fields before sending a save request. No confusing generic error is required to find the missing value.</p></td>
+      <td style="width:33%;padding:18px;background:#f6fafb;border:1px solid #e1eaef;border-top:3px solid #15a89b;border-radius:8px;"><strong style="font-size:1.02rem;color:#0e8377;display:block;margin-bottom:5px;">3. Protect every entry point</strong><p style="font-size:.95rem;color:#5a6b7f;margin:0;line-height:1.55;">The ORM repeats the validation on create and write, covering imports, integrations, and API calls as well as the web form.</p></td>
+    </tr>
+  </table>
+  <p style="font-size:.95rem;color:#5a6b7f;margin:18px 0 0;line-height:1.6;"><strong style="color:#0b1a2e;">Controlled exceptions:</strong> assign an Exempt Group for approved cleanup users, and decide independently whether imports should enforce the rule.</p>
 </div>
 
 <!-- TECHNICAL INFO -->
@@ -203,6 +247,8 @@
   <div style="background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:10px;padding:16px 20px;margin-bottom:10px;"><strong style="display:block;font-size:.92rem;color:#0b1a2e;margin-bottom:6px;">Does Odoo warn about duplicate contacts on save?</strong><p style="font-size:.86rem;color:#5a6b7f;line-height:1.65;margin:0;">With this free module, yes; it shows a warning when a matching record is found.</p></div>
   <div style="background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:10px;padding:16px 20px;margin-bottom:10px;"><strong style="display:block;font-size:.92rem;color:#0b1a2e;margin-bottom:6px;">Do I need the advanced version?</strong><p style="font-size:.86rem;color:#5a6b7f;line-height:1.65;margin:0;">The free version warns on close matches; Smart Duplicate Detector adds fuzzy matching and a configurable threshold.</p></div>
   <div style="background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:10px;padding:16px 20px;margin-bottom:10px;"><strong style="display:block;font-size:.92rem;color:#0b1a2e;margin-bottom:6px;">Does the duplicate warning block saving or just alert the user in Odoo?</strong><p style="font-size:.86rem;color:#5a6b7f;line-height:1.65;margin:0;">It shows a warning when a matching record is found, so the user can stop and review before creating a duplicate. It acts as a guardrail rather than a hard block, leaving the decision with your team.</p></div>
+  <div style="background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:10px;padding:16px 20px;margin-bottom:10px;"><strong style="display:block;font-size:.92rem;color:#0b1a2e;margin-bottom:6px;">Can I make a field required without changing the original Odoo view?</strong><p style="font-size:.86rem;color:#5a6b7f;line-height:1.65;margin:0;">Yes. Create a Required Field Rule for the model. The field is highlighted with native Odoo feedback on the form, and the server enforces the rule on create and write.</p></div>
+  <div style="background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:10px;padding:16px 20px;margin-bottom:10px;"><strong style="display:block;font-size:.92rem;color:#0b1a2e;margin-bottom:6px;">Can administrators exempt a group or control imports?</strong><p style="font-size:.86rem;color:#5a6b7f;line-height:1.65;margin:0;">Yes. Each required-field rule supports an Exempt Group and an independent Apply During Imports option, so cleanup and historical data loads remain controlled.</p></div>
   <div style="background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:10px;padding:16px 20px;margin-bottom:10px;"><strong style="display:block;font-size:.92rem;color:#0b1a2e;margin-bottom:6px;">Which records can Odoo check for duplicates with this module?</strong><p style="font-size:.86rem;color:#5a6b7f;line-height:1.65;margin:0;">It checks contacts and other records as they are saved, catching the duplicate contacts and records that quietly build up over time. Preventing them at the source keeps your reporting and communication reliable.</p></div>
   <div style="background:#f6fafb;border:1px solid #e1eaef;border-left:3px solid #15a89b;border-radius:10px;padding:16px 20px;margin-bottom:0;"><strong style="display:block;font-size:.92rem;color:#0b1a2e;margin-bottom:6px;">Does the free duplicate detector work on Odoo Community and Enterprise?</strong><p style="font-size:.86rem;color:#5a6b7f;line-height:1.65;margin:0;">Yes, it works on both Community and Enterprise. Check the Odoo Apps Store listing for the exact version it supports.</p></div>
 </div>
