@@ -75,6 +75,17 @@ performs the same check again for non-browser writes.
 - Required-field rules use the same per-model configuration pattern and are
   enforced in both the web client and the ORM layer.
 
+## Included system screenshots
+
+The Apps description includes real Odoo interface screenshots showing:
+
+- The Technical menu entry and Duplicate Rules configuration screen.
+- The duplicate alert displayed on a Contact form when a matching record is found.
+
+The Required Field Rules section also documents the native field-level feedback
+shown by Odoo before saving. Screenshots are kept separate from the module logic
+so they can be replaced with customer-approved production captures later.
+
 ## License
 
 LGPL-3 — see [LICENSE](LICENSE).
