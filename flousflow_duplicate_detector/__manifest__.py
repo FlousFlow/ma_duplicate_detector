@@ -10,7 +10,7 @@
     'images': ['static/description/banner.gif'],
     'assets': {
         'web.assets_backend': [
-            'ma_duplicate_detector/static/src/form_notify.js',
+            'flousflow_duplicate_detector/static/src/form_notify.js',
         ],
     },
     'depends': ['base', 'product'],
