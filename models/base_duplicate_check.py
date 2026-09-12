@@ -252,7 +252,7 @@ class Base(models.AbstractModel):
                 return None  # skip check if any field is empty/unset
 
             leafs = self._ma_field_leafs(field, value)
-            group = leafs[0] if len(leafs) == 1 else ['|'] + leafs
+            group = [leafs[0]] if len(leafs) == 1 else ['|'] + leafs
             domain = group if domain is None else ['&', domain, group]
 
         if domain is None:

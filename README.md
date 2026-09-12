@@ -1,4 +1,8 @@
-# Duplicate Record Detector
+# FlousFlow Duplicate Detector
+
+Maintained by [FlousFlow](https://flousflow.com) for Odoo 19 Community.
+
+The technical module name remains ma_duplicate_detector to preserve compatibility with existing FlousFlow installations and database records.
 
 Configurable duplicate detection for any Odoo model — warn users at the point of entry when the record they are saving already exists.
 
