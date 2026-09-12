@@ -113,3 +113,17 @@ class MaRequiredFieldRule(models.Model):
     def _compute_name(self):
         for rec in self:
             rec.name = _('%(model)s: required fields', model=rec.model_id.name or '')
+
+    @api.model
+    def get_required_field_names(self, model_name):
+        """Return active required fields for the web client's pre-save check.
+
+        The method is intentionally sudo-backed: the rule is technical
+        configuration, while the resulting validation must apply to normal
+        users without granting them access to edit or browse the rule model.
+        """
+        rule = self.sudo().search(
+            [('model_name', '=', model_name), ('active', '=', True)],
+            limit=1,
+        )
+        return rule.field_ids.mapped('name') if rule else []

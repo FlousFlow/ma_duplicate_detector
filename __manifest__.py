@@ -1,6 +1,6 @@
 {
     'name': 'FlousFlow Duplicate Detector',
-    'version': '19.0.2.0.1',
+    'version': '19.0.2.0.2',
     'category': 'Extra Tools',
     'summary': 'Configurable duplicate detection for Odoo records with warnings before duplicate data is saved.',
     'author': 'FlousFlow',

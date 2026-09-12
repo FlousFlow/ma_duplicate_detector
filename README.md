@@ -20,6 +20,9 @@ Duplicate contacts, products, and vendors accumulate silently until they become 
 - **Performance Optimized** — uses a `limit=1` search that stops at the first match. Works in milliseconds even on tables with 150,000+ records. Zero overhead when no rule is configured for a model.
 - **Admin-Only Configuration** — rules are accessible only to system administrators (Settings → Technical → Duplicate Detector). Regular users see the warnings but cannot modify or disable the rules.
 - **Import Safe** — checks run on every create, including imports and API calls.
+- **Standard Field Highlighting** — required-field rules are checked before the
+  save RPC; every missing field is marked with Odoo's native invalid-field
+  styling so users can see exactly what to complete.
 
 ## Installation
 
