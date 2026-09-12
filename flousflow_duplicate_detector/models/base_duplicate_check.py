@@ -12,6 +12,13 @@ PHONE_FIELDS = {'phone', 'mobile', 'whatsapp', 'whatsapp_number'}
 class Base(models.AbstractModel):
     _inherit = 'base'
 
+    @staticmethod
+    def _ma_value_is_empty(value):
+        """Handle scalar and JSON/list values used by required-field rules."""
+        return value in (False, None, '', 0) or (
+            isinstance(value, (dict, list, tuple, set)) and not value
+        )
+
     def _ma_rule_available(self):
         return (
             'ma.duplicate.rule' in self.env
@@ -101,7 +108,7 @@ class Base(models.AbstractModel):
             if field.name not in vals:
                 continue
             value = vals[field.name]
-            if value in (False, None, '', 0):
+            if self._ma_value_is_empty(value):
                 missing.append(field.field_description)
         if missing:
             raise UserError(_(
@@ -135,7 +142,7 @@ class Base(models.AbstractModel):
             else:
                 v = self[field.name]
                 v = v.id if hasattr(v, 'id') else v
-            if v in (False, None, '', 0):
+            if self._ma_value_is_empty(v):
                 missing.append(field.field_description)
         if missing:
             raise UserError(_(

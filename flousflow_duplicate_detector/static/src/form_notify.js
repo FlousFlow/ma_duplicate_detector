@@ -61,6 +61,12 @@ function isEmptyRequiredValue(record, fieldName) {
     if (field.type === "many2one") {
         return !value || !value.id;
     }
+    // JSON fields (for example analytic_distribution) are represented as an
+    // empty object when no value has been selected. Treat empty arrays and
+    // objects as empty too, otherwise Save proceeds with an invalid record.
+    if (typeof value === "object" && value !== null) {
+        return Object.keys(value).length === 0;
+    }
     return value === false || value === null || value === undefined || value === "";
 }
 
