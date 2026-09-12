@@ -81,11 +81,6 @@ patch(FormController.prototype, {
     },
 
     async onWillSaveRecord(record, params) {
-        const result = await super.onWillSaveRecord(record, params);
-        if (result === false) {
-            return false;
-        }
-
         const requiredFields = await getRequiredFields(this.orm, record.resModel);
         const missingFields = [];
         for (const fieldName of requiredFields) {
@@ -103,11 +98,18 @@ patch(FormController.prototype, {
         }
         if (missingFields.length) {
             for (const fieldName of missingFields) {
-                await record.setInvalidField(fieldName);
+                record.setInvalidField(fieldName);
             }
             // Keep the same standard invalid-field styling/notification used
-            // by native required fields, without sending a doomed RPC.
-            await record.checkValidity({ displayNotification: true });
+            // by native required fields, without entering the save flow. The
+            // synchronous internal check is intentional: checkValidity() may
+            // wait for onchange changes while a save is already in progress.
+            record._checkValidity({ displayNotification: true });
+            return false;
+        }
+
+        const result = await super.onWillSaveRecord(record, params);
+        if (result === false) {
             return false;
         }
 
