@@ -3,6 +3,7 @@ import re
 from lxml import etree
 from odoo import api, models
 from odoo.exceptions import RedirectWarning, UserError
+from odoo.orm.domains import Domain
 from odoo.tools.sql import table_exists
 from odoo import _
 
@@ -252,21 +253,24 @@ class Base(models.AbstractModel):
         return leafs
 
     def _ma_find_duplicate(self, rule, vals, exclude_id):
-        domain = None
+        field_domains = []
         for field in rule.field_ids:
             value = vals.get(field.name)
             if value in (False, None, '', 0):
                 return None  # skip check if any field is empty/unset
 
-            leafs = self._ma_field_leafs(field, value)
-            group = [leafs[0]] if len(leafs) == 1 else ['|'] + leafs
-            domain = group if domain is None else ['&', domain, group]
+            leaf_domains = [
+                Domain(*leaf)
+                for leaf in self._ma_field_leafs(field, value)
+            ]
+            field_domains.append(Domain.OR(leaf_domains))
 
-        if domain is None:
+        if not field_domains:
             return None
 
+        domain = Domain.AND(field_domains)
         if exclude_id:
-            domain = ['&', domain, ('id', '!=', exclude_id)]
+            domain &= Domain('id', '!=', exclude_id)
 
         return self.env[self._name].sudo().search(domain, limit=1)
 
