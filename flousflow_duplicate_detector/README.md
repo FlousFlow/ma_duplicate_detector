@@ -1,12 +1,12 @@
 # FlousFlow Duplicate Detector
 
-Maintained by [FlousFlow](https://flousflow.com) for Odoo 19 Community.
+Maintained by [FlousFlow](https://flousflow.com) for Odoo 20 Community.
 
 The package name is flousflow_duplicate_detector. Internal model names remain compatible with the original implementation.
 
 Configurable duplicate detection for any Odoo model — warn users at the point of entry when the record they are saving already exists.
 
-**Compatible with Odoo 19.0**
+**Compatible with Odoo 20.0**
 
 ## Overview
 
@@ -38,7 +38,7 @@ Duplicate contacts, products, and vendors accumulate silently until they become 
 
 1. Add this repository folder to your `addons_path`.
 2. Update the apps list (Apps → Update Apps List).
-3. Search for **Duplicate Record Detector** and install.
+3. Search for **FlousFlow Duplicate Detector** and install.
 
 ## Configuration
 
