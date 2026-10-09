@@ -15,7 +15,7 @@
     },
     'depends': ['base', 'product'],
     'data': [
-        'security/ir.model.access.csv',
+        'security/ir.access.csv',
         'data/ma_required_rule_data.xml',
         'views/ma_duplicate_rule_views.xml',
         'views/ma_duplicate_menu.xml',

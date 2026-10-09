@@ -42,10 +42,10 @@ class MaDuplicateRule(models.Model):
     )
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('unique_model_id', 'UNIQUE(model_id)',
-         'A duplicate detection rule already exists for this model.'),
-    ]
+    _unique_model_id = models.Constraint(
+        'UNIQUE(model_id)',
+        'A duplicate detection rule already exists for this model.',
+    )
 
     @api.depends('model_id')
     def _compute_name(self):
@@ -104,10 +104,10 @@ class MaRequiredFieldRule(models.Model):
     )
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('unique_model_id', 'UNIQUE(model_id)',
-         'A required-field rule already exists for this model.'),
-    ]
+    _unique_model_id = models.Constraint(
+        'UNIQUE(model_id)',
+        'A required-field rule already exists for this model.',
+    )
 
     @api.depends('model_id')
     def _compute_name(self):
