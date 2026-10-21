@@ -1,12 +1,12 @@
 # FlousFlow Duplicate Detector
 
-Maintained by [FlousFlow](https://flousflow.com) for Odoo 19 Community.
+Maintained by [FlousFlow](https://flousflow.com) for Odoo 18 Community.
 
 The package name is flousflow_duplicate_detector. Internal model names remain compatible with the original implementation.
 
 Configurable duplicate detection for any Odoo model — warn users at the point of entry when the record they are saving already exists.
 
-**Compatible with Odoo 19.0**
+**Compatible with Odoo 18.0**
 
 ## Overview
 

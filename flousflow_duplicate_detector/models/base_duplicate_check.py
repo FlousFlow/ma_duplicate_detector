@@ -3,7 +3,7 @@ import re
 from lxml import etree
 from odoo import api, models
 from odoo.exceptions import RedirectWarning, UserError
-from odoo.orm.domains import Domain
+from odoo.osv import expression
 from odoo.tools.sql import table_exists
 from odoo import _
 
@@ -249,8 +249,23 @@ class Base(models.AbstractModel):
             digits = re.sub(r'\D', '', value)
             tail = digits[-8:]
             if len(digits) >= 8 and tail != value:
-                leafs.append((field.name, 'ilike', tail))
+                # Formatting characters can split the last digits in the
+                # stored value (e.g. ``+20 100 956 0007``), so the SQL
+                # pre-filter uses a short suffix and the exact digit check
+                # below remains authoritative.
+                leafs.append((field.name, 'ilike', digits[-4:]))
         return leafs
+
+    @staticmethod
+    def _ma_phone_values_match(left, right):
+        if not isinstance(left, str) or not isinstance(right, str):
+            return False
+        left_digits = re.sub(r'\D', '', left)
+        right_digits = re.sub(r'\D', '', right)
+        return len(left_digits) >= 8 and len(right_digits) >= 8 and (
+            left_digits == right_digits
+            or left_digits[-8:] == right_digits[-8:]
+        )
 
     def _ma_find_duplicate(self, rule, vals, exclude_id):
         field_domains = []
@@ -259,20 +274,37 @@ class Base(models.AbstractModel):
             if value in (False, None, '', 0):
                 return None  # skip check if any field is empty/unset
 
-            leaf_domains = [
-                Domain(*leaf)
-                for leaf in self._ma_field_leafs(field, value)
-            ]
-            field_domains.append(Domain.OR(leaf_domains))
+            # Odoo 18 uses list-based domains; the Domain builder was added
+            # after 18.0. Keep the same AND/OR semantics with its compatible
+            # expression helpers.
+            field_domains.append(
+                expression.OR([
+                    [leaf]
+                    for leaf in self._ma_field_leafs(field, value)
+                ])
+            )
 
         if not field_domains:
             return None
 
-        domain = Domain.AND(field_domains)
+        domain = expression.AND(field_domains)
         if exclude_id:
-            domain &= Domain('id', '!=', exclude_id)
+            domain = expression.AND([domain, [('id', '!=', exclude_id)]])
 
-        return self.env[self._name].sudo().search(domain, limit=1)
+        model = self.env[self._name].sudo()
+        has_phone = any(field.name in PHONE_FIELDS for field in rule.field_ids)
+        candidates = model.search(domain, limit=100 if has_phone else 1)
+        for candidate in candidates:
+            if all(
+                self._ma_phone_values_match(
+                    vals[field.name], candidate[field.name]
+                )
+                if field.name in PHONE_FIELDS
+                else True
+                for field in rule.field_ids
+            ):
+                return candidate
+        return self.env[self._name].browse()
 
     def _ma_check_duplicate_vals(self, rule, vals, exclude_id):
         duplicate = self._ma_find_duplicate(rule, vals, exclude_id)
