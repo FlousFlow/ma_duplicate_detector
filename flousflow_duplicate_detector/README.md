@@ -34,6 +34,10 @@ Duplicate contacts, products, and vendors accumulate silently until they become 
   non-blocking notification that lets the record save while linking to the
   existing match.
 
+No duplicate or required-field rules are enabled automatically at install
+time. Administrators explicitly create and activate the rules that match
+their business process.
+
 ## Installation
 
 1. Add this repository folder to your `addons_path`.
