@@ -8,6 +8,10 @@ Configurable duplicate detection for any Odoo model — warn users at the point 
 
 **Compatible with Odoo 19.0**
 
+No duplicate or required-field rules are enabled automatically at install
+time. Administrators explicitly create and activate the rules that match
+their business process.
+
 ## Overview
 
 Duplicate contacts, products, and vendors accumulate silently until they become a data quality crisis. This module adds configurable duplicate-checking rules to any Odoo model. Administrators define which model to watch and which fields to match. When a user saves a record that already exists in the system, they see an instant alert with the name of the existing record and a direct link to open it.
